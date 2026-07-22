@@ -8,7 +8,7 @@ import {moduleName} from './constants.js';
 
 const jiti = createJiti(import.meta.url, {moduleCache: false});
 
-const loadTypeScriptConfig = async (filepath: string) => jiti.import(filepath, {default: true});
+const loadTypeScriptConfig = async (filepath: string) => { throw new Error("STUB"); };
 
 /**
 Finds the XO config file.

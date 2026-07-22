@@ -2,29 +2,13 @@ import openEditor from 'open-editor';
 import type {ESLint} from 'eslint';
 import {type XoLintResult} from './types.js';
 
-const sortResults = (a: ESLint.LintResult, b: ESLint.LintResult) => a.errorCount + b.errorCount > 0 ? (a.errorCount - b.errorCount) : (a.warningCount - b.warningCount);
+const sortResults = (a: ESLint.LintResult, b: ESLint.LintResult) => { throw new Error("STUB"); };
 
 const resultToFile = (result: ESLint.LintResult) => {
 	const [message] = result.messages
 		.toSorted((a, b) => {
-			if (a.severity < b.severity) {
-				return 1;
-			}
-
-			if (a.severity > b.severity) {
-				return -1;
-			}
-
-			if (a.line < b.line) {
-				return -1;
-			}
-
-			if (a.line > b.line) {
-				return 1;
-			}
-
-			return 0;
-		});
+            throw new Error("STUB");
+        });
 
 	return {
 		file: result.filePath,
@@ -34,14 +18,12 @@ const resultToFile = (result: ESLint.LintResult) => {
 };
 
 const getFiles = (report: XoLintResult, isMatchingResult: (result: ESLint.LintResult) => boolean) => report.results
-	.filter(result => isMatchingResult(result))
+	.filter(result => { throw new Error("STUB"); })
 	.toSorted(sortResults)
-	.map(result => resultToFile(result));
+	.map(result => { throw new Error("STUB"); });
 
 const openReport = async (report: XoLintResult) => {
-	const count = report.errorCount > 0 ? 'errorCount' : 'warningCount';
-	const files = getFiles(report, result => result[count] > 0);
-	await openEditor(files);
+    throw new Error("STUB");
 };
 
 export default openReport;

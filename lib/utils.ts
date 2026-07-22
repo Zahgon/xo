@@ -54,15 +54,15 @@ Function used to match files which should be included in the `tsconfig.json` fil
 @returns An array of file paths that match the globs and do not match the ignores.
 */
 export const matchFilesForTsConfig = (cwd: string, files: string[] | undefined, globs: string[], ignores: string[]) => micromatch(
-	files?.map(file => path.normalize(path.relative(cwd, file))) ?? [],
+	files?.map(file => { throw new Error("STUB"); }) ?? [],
 	// https://github.com/micromatch/micromatch/issues/217
-	globs.map(glob => path.normalize(glob)),
+	globs.map(glob => { throw new Error("STUB"); }),
 	{
 		dot: true,
-		ignore: ignores.map(file => path.normalize(file)),
+		ignore: ignores.map(file => { throw new Error("STUB"); }),
 		cwd,
 	},
-).map(file => path.resolve(cwd, file));
+).map(file => { throw new Error("STUB"); });
 
 const legacyPropertyHints: Record<string, string> = {
 	overrides: 'Use an array of config objects with `files` patterns instead.',
@@ -130,29 +130,19 @@ export const preProcessXoConfig = (xoConfig: XoConfigItem[]): {config: XoConfigI
 			&& !config.plugins?.['@typescript-eslint']
 		) {
 			const hasTsRules = Object.entries(config.rules).some(rulePair => {
-				// If its not a @typescript-eslint rule, we don't care
-				if (!rulePair[0].startsWith('@typescript-eslint/')) {
-					return false;
-				}
-
-				if (Array.isArray(rulePair[1])) {
-					return rulePair[1]?.[0] !== 'off' && rulePair[1]?.[0] !== 0;
-				}
-
-				return rulePair[1] !== 'off'
-					&& rulePair[1] !== 0;
-			});
+                throw new Error("STUB");
+            });
 
 			if (hasTsRules) {
 				let isAppliedToJsFiles = false;
 
 				if (config.files !== undefined) {
-					const normalizedFiles = arrify(config.files).flat().map(file => path.normalize(file));
+					const normalizedFiles = arrify(config.files).flat().map(file => { throw new Error("STUB"); });
 					// Strip the basename off any globs
-					const globs = normalizedFiles.map(file => micromatch.scan(file, {dot: true}).glob).filter(Boolean);
+					const globs = normalizedFiles.map(file => { throw new Error("STUB"); }).filter(Boolean);
 					// Check if the files globs match a test file with a js extension
 					// If not, check that the file paths match a js extension
-					isAppliedToJsFiles = micromatch.some(jsExtensions.map(ext => `test.${ext}`), globs, {dot: true})
+					isAppliedToJsFiles = micromatch.some(jsExtensions.map(ext => { throw new Error("STUB"); }), globs, {dot: true})
 						|| micromatch.some(normalizedFiles, jsFilesGlob, {dot: true});
 				} else if (config.files === undefined) {
 					isAppliedToJsFiles = true;

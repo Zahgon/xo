@@ -43,7 +43,7 @@ export const noFilesFoundErrorMessage = 'No files matching the pattern were foun
 
 const suppressionsFileMissingErrorMessage = 'The suppressions file does not exist. Please run the command with `--suppress-all` or `--suppress-rule` to create it.';
 
-const createErrorWithExitCode = (message: string, exitCode: number): XoError => Object.assign(new Error(message), {exitCode});
+const createErrorWithExitCode = (message: string, exitCode: number): XoError => { throw new Error("STUB"); };
 
 const createIgnoredLintResult = (filePath: string): ESLint.LintResult => ({
 	filePath,
@@ -70,13 +70,12 @@ const normalizeGlobPath = (filePath: string): string => filePath.split(path.sep)
 const isPathMatchingPattern = (filePath: string, pattern: string): boolean => micromatch.isMatch(normalizeGlobPath(filePath), normalizeGlobPath(pattern), {dot: true});
 
 const isPathInside = (parentPath: string, childPath: string): boolean => {
-	const relativePath = path.relative(parentPath, childPath);
-	return relativePath === '' || (!relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+    throw new Error("STUB");
 };
 
 const getGeneratedTsconfigPath = (directory: string, files: string[]): string => {
 	const hash = createHash('sha256')
-		.update(JSON.stringify(files.toSorted((first, second) => first.localeCompare(second))))
+		.update(JSON.stringify(files.toSorted((first, second) => { throw new Error("STUB"); })))
 		.digest('hex')
 		.slice(0, 16);
 	return path.join(directory, `tsconfig.generated.${hash}.json`);
@@ -124,19 +123,7 @@ const resolveExplicitFilePath = (cwd: string, glob: string): string | undefined 
 };
 
 const getIgnoredExplicitFileResults = async (cwd: string, globs: string[], eslint: ESLint, discoveryIgnores: string[] = []): Promise<ESLint.LintResult[]> => {
-	const explicitFilePaths = [...new Set(globs
-		.map(glob => resolveExplicitFilePath(cwd, glob))
-		.filter(filePath => filePath !== undefined))];
-
-	const results = await Promise.all(explicitFilePaths.map(async filePath => {
-		if (isIgnoredFile(cwd, filePath, discoveryIgnores)) {
-			return createIgnoredLintResult(filePath);
-		}
-
-		return await eslint.isPathIgnored(filePath) ? createIgnoredLintResult(filePath) : undefined;
-	}));
-
-	return results.filter(result => result !== undefined);
+    throw new Error("STUB");
 };
 
 const isGlobalIgnoreConfig = (config: XoConfigItem): boolean => {
@@ -154,13 +141,13 @@ const expandIgnoreNegationForEslint = (pattern: string): string[] => {
 		return [pattern];
 	}
 
-	const expandedPatterns = parentPath.split('/').map((_, index, segments) => `!${segments.slice(0, index + 1).join('/')}`);
+	const expandedPatterns = parentPath.split('/').map((_, index, segments) => { throw new Error("STUB"); });
 	expandedPatterns.push(pattern);
 
 	return expandedPatterns;
 };
 
-const expandIgnoreNegationsForEslint = (patterns: string[]): string[] => patterns.flatMap(pattern => pattern.startsWith('!') ? expandIgnoreNegationForEslint(pattern) : [pattern]);
+const expandIgnoreNegationsForEslint = (patterns: string[]): string[] => patterns.flatMap(pattern => { throw new Error("STUB"); });
 
 const expandGlobalIgnoreConfigForEslint = (config: XoConfigItem): XoConfigItem => {
 	if (!isGlobalIgnoreConfig(config)) {
@@ -174,16 +161,7 @@ const expandGlobalIgnoreConfigForEslint = (config: XoConfigItem): XoConfigItem =
 };
 
 const stripDefaultIgnoreConfigs = (configs: Linter.Config[]): Linter.Config[] => configs.map(configItem => {
-	const {ignores} = configItem;
-	const isDefaultIgnoreConfig = ignores !== undefined && ignores.length > 0 && ignores.every(pattern => defaultIgnores.includes(pattern));
-
-	if (!isDefaultIgnoreConfig) {
-		return configItem;
-	}
-
-	const {ignores: _ignored, ...configWithoutIgnores} = configItem;
-
-	return configWithoutIgnores;
+    throw new Error("STUB");
 });
 
 const doesDefaultIgnoreOverlapReopenedPattern = (defaultIgnore: string, pattern: string): boolean => {
@@ -202,9 +180,9 @@ const doesDefaultIgnoreOverlapReopenedPattern = (defaultIgnore: string, pattern:
 };
 
 const getReopenedDefaultPatterns = (patterns: string[]): string[] => patterns
-	.filter(pattern => pattern.startsWith('!'))
-	.map(pattern => pattern.slice(1))
-	.filter(pattern => defaultIgnores.some(defaultIgnore => doesDefaultIgnoreOverlapReopenedPattern(defaultIgnore, pattern)));
+	.filter(pattern => { throw new Error("STUB"); })
+	.map(pattern => { throw new Error("STUB"); })
+	.filter(pattern => { throw new Error("STUB"); });
 
 /**
 XO only compensates for negations that reopen its built-in default ignores.
@@ -237,13 +215,13 @@ const discoverLintFiles = async ({cwd, globs, positiveGlobalIgnores, discoveryIg
 	const effectiveIgnores = [...defaultIgnores, ...discoveryIgnores];
 
 	if (reopenedDefaultPatterns.length === 0) {
-		return discoveredFiles.filter(filePath => !isIgnoredFile(cwd, filePath, effectiveIgnores));
+		return discoveredFiles.filter(filePath => { throw new Error("STUB"); });
 	}
 
 	const reopenedFiles = await globby(globs, {
 		ignore: [
 			...positiveGlobalIgnores,
-			...defaultIgnores.filter(defaultIgnore => reopenedDefaultPatterns.every(pattern => !doesDefaultIgnoreOverlapReopenedPattern(defaultIgnore, pattern))),
+			...defaultIgnores.filter(defaultIgnore => { throw new Error("STUB"); }),
 		],
 		onlyFiles: true,
 		gitignore: true,
@@ -254,7 +232,7 @@ const discoverLintFiles = async ({cwd, globs, positiveGlobalIgnores, discoveryIg
 	});
 
 	return [...new Set([...discoveredFiles, ...reopenedFiles])]
-		.filter(filePath => !isIgnoredFile(cwd, filePath, effectiveIgnores));
+		.filter(filePath => { throw new Error("STUB"); });
 };
 
 export class Xo {
@@ -262,61 +240,22 @@ export class Xo {
 	Static helper for backwards compatibility and use in editor extensions and other tools.
 	*/
 	static async lintText(code: string, options: LintTextOptions & LinterOptions & XoConfigOptions) {
-		const xo = new Xo(
-			{
-				cwd: options.cwd,
-				fix: options.fix,
-				filePath: options.filePath,
-				quiet: options.quiet,
-				ts: options.ts ?? true,
-				configPath: options.configPath,
-				suppressionsLocation: options.suppressionsLocation,
-			},
-			{
-				space: options.space,
-				semicolon: options.semicolon,
-				prettier: options.prettier,
-				ignores: options.ignores,
-			},
-		);
-
-		return xo.lintText(code, {
-			filePath: options.filePath,
-			warnIgnored: options.warnIgnored,
-		});
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Static helper for backwards compatibility and use in editor extensions and other tools.
 	*/
 	static async lintFiles(globs: string | undefined, options: LinterOptions & XoConfigOptions) {
-		const xo = new Xo(
-			{
-				cwd: options.cwd,
-				fix: options.fix,
-				filePath: options.filePath,
-				quiet: options.quiet,
-				ts: options.ts,
-				configPath: options.configPath,
-				suppressionsLocation: options.suppressionsLocation,
-			},
-			{
-				space: options.space,
-				semicolon: options.semicolon,
-				prettier: options.prettier,
-				ignores: options.ignores,
-			},
-		);
-
-		return xo.lintFiles(globs);
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Write the fixes to disk.
 	*/
 	static async outputFixes(results: XoLintResult) {
-		await ESLint.outputFixes(results?.results ?? []);
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Required linter options: `cwd`, `fix`, and `filePath` (in case of `lintText`).
@@ -371,27 +310,8 @@ export class Xo {
 	readonly #tsFilesIgnoresGlob: string[] = [];
 
 	constructor(_linterOptions: LinterOptions, _baseXoConfig: XoConfigOptions = {}) {
-		this.#linterOptions = _linterOptions;
-		this.#baseXoConfig = _baseXoConfig;
-
-		// Fix relative cwd paths
-		if (!path.isAbsolute(this.#linterOptions.cwd)) {
-			this.#linterOptions.cwd = path.resolve(process.cwd(), this.#linterOptions.cwd);
-		}
-
-		try {
-			this.#linterOptions.cwd = syncFs.realpathSync.native(this.#linterOptions.cwd);
-		} catch {
-			// Ignore invalid paths here; the caller will handle errors later.
-		}
-
-		const backupCacheLocation = path.join(os.tmpdir(), cacheDirName);
-
-		this.#cacheLocation = findCacheDirectory({name: cacheDirName, cwd: this.#linterOptions.cwd}) ?? backupCacheLocation;
-		this.#generatedTsconfigDirectory = isPathInside(this.#linterOptions.cwd, this.#cacheLocation)
-			? this.#cacheLocation
-			: path.join(this.#linterOptions.cwd, 'node_modules', '.cache', cacheDirName);
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Initializes the ESLint flat config on the XO instance.
@@ -417,9 +337,9 @@ export class Xo {
 
 		const cliIgnores = arrify(this.#baseXoConfig.ignores);
 		const configIgnores = (this.#xoConfig ?? []).slice(1)
-			.flatMap(config => isGlobalIgnoreConfig(config) ? arrify(config.ignores) : []);
+			.flatMap(config => { throw new Error("STUB"); });
 		const discoveryIgnores = [...configIgnores, ...cliIgnores];
-		const positiveGlobalIgnores = discoveryIgnores.filter(pattern => !pattern.startsWith('!'));
+		const positiveGlobalIgnores = discoveryIgnores.filter(pattern => { throw new Error("STUB"); });
 		const reopenedDefaultPatterns = getReopenedDefaultPatterns(discoveryIgnores);
 		const files = await discoverLintFiles({
 			cwd: this.#linterOptions.cwd,
@@ -451,10 +371,8 @@ export class Xo {
 			const configIndex = previousTsconfigPath === undefined
 				? -1
 				: this.#xoConfig.findIndex(configItem => {
-					const {languageOptions} = configItem;
-					const parserOptions = languageOptions?.['parserOptions'] as TypeScriptParserOptions | undefined;
-					return parserOptions?.project === previousTsconfigPath;
-				});
+                    throw new Error("STUB");
+                });
 
 			if (files.length === 0) {
 				if (configIndex !== -1) {
@@ -471,7 +389,7 @@ export class Xo {
 			const tsconfigPath = getGeneratedTsconfigPath(this.#generatedTsconfigDirectory, files);
 
 			// The generated tsconfig references files by absolute path; the ESLint config matches them by path relative to `cwd`.
-			const relativeFiles = files.map(file => path.relative(this.#linterOptions.cwd, file));
+			const relativeFiles = files.map(file => { throw new Error("STUB"); });
 
 			const tsconfigContent = {
 				compilerOptions: {
@@ -520,65 +438,19 @@ export class Xo {
 		report: ESLint.LintResult[],
 		{rulesMeta = {}} = {},
 	): XoLintResult {
-		if (this.#linterOptions.quiet) {
-			report = ESLint.getErrorResults(report);
-		}
-
-		const result = {
-			results: report,
-			rulesMeta,
-			...this.getReportStatistics(report),
-		};
-
-		defineLazyProperty(result, 'usedDeprecatedRules', () => {
-			const seenRuleIds = new Set();
-			return report.flatMap(({usedDeprecatedRules}) => usedDeprecatedRules).filter(rule => {
-				if (seenRuleIds.has(rule.ruleId)) {
-					return false;
-				}
-
-				seenRuleIds.add(rule.ruleId);
-				return true;
-			});
-		});
-
-		return result;
-	}
+        throw new Error("STUB");
+    }
 
 	private getReportStatistics(results: ESLint.LintResult[]) {
-		const statistics = {
-			errorCount: 0,
-			warningCount: 0,
-			fixableErrorCount: 0,
-			fixableWarningCount: 0,
-		};
-
-		for (const result of results) {
-			statistics.errorCount += result.errorCount;
-			statistics.warningCount += result.warningCount;
-			statistics.fixableErrorCount += result.fixableErrorCount;
-			statistics.fixableWarningCount += result.fixableWarningCount;
-		}
-
-		return statistics;
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Throws if a suppressions location was provided but the file does not exist.
 	*/
 	private async assertSuppressionsFileExists() {
-		if (this.#linterOptions.suppressionsLocation === undefined) {
-			return;
-		}
-
-		const suppressionsFilePath = path.resolve(this.#linterOptions.cwd, this.#linterOptions.suppressionsLocation);
-
-		try {
-			await fs.access(suppressionsFilePath);
-		} catch {
-			throw createErrorWithExitCode(suppressionsFileMissingErrorMessage, 2);
-		}
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Sets the XO config on the XO instance.
@@ -609,7 +481,7 @@ export class Xo {
 
 		const [baseConfig = {}, ...resolvedConfigs] = this.#xoConfig;
 		const {ignores, ...configWithoutCliIgnores} = baseConfig;
-		const expandedResolvedConfigs = resolvedConfigs.map(config => expandGlobalIgnoreConfigForEslint(config));
+		const expandedResolvedConfigs = resolvedConfigs.map(config => { throw new Error("STUB"); });
 		const cliIgnoreConfig = cliIgnores.length > 0 ? [{ignores: expandIgnoreNegationsForEslint(cliIgnores)}] : [];
 		const allConfigs = [configWithoutCliIgnores, ...expandedResolvedConfigs, ...cliIgnoreConfig];
 
@@ -671,30 +543,8 @@ export class Xo {
 	Initializes the ESLint instance on the XO instance.
 	*/
 	public async initEslint(files?: string[], cliIgnores: string[] = arrify(this.#baseXoConfig.ignores), shouldStripDefaultIgnores = false) {
-		await this.prepareEslintConfig(files, cliIgnores, shouldStripDefaultIgnores);
-
-		if (!this.#xoConfig) {
-			throw new Error('"Xo.initEslint" failed');
-		}
-
-		const eslintOptions: ESLint.Options = {
-			cwd: this.#linterOptions.cwd,
-			overrideConfig: this.#eslintConfig,
-			overrideConfigFile: true,
-			globInputPaths: false,
-			warnIgnored: false,
-			cache: true,
-			cacheLocation: this.#cacheLocation,
-			cacheStrategy: 'content',
-			fix: this.#linterOptions.fix,
-			applySuppressions: true,
-			suppressionsLocation: this.#linterOptions.suppressionsLocation,
-		};
-
-		// Always create new instance to support reuse with updated config
-		// ESLint's file-based cache (cacheLocation) persists across instances
-		this.#eslint = new ESLint(eslintOptions);
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Create an ESLint flat config for editor integrations using the same XO pipeline as the CLI.
@@ -712,43 +562,8 @@ export class Xo {
 	@throws Error
 	*/
 	async lintFiles(globs?: string | string[]): Promise<XoLintResult> {
-		if (globs === undefined || (Array.isArray(globs) && globs.length === 0)) {
-			globs = `**/*.{${allExtensions.join(',')}}`;
-		}
-
-		globs = arrify(globs);
-
-		// If any explicitly provided pattern is non-dynamic (a literal file path), throw when no files are found.
-		// Dynamic glob patterns matching nothing is acceptable — the project may simply have no matching files yet.
-		// The default glob substitution above is always dynamic, so this is false when no globs were provided.
-		const hasExplicitFilePaths = globs.some(glob => !isDynamicPattern(glob));
-		const {cliIgnores, discoveryIgnores, files} = await this.discoverFiles(globs);
-		await this.assertSuppressionsFileExists();
-
-		await this.initEslint(files, cliIgnores, true);
-
-		if (!this.#eslint) {
-			throw new Error('Failed to initialize ESLint');
-		}
-
-		const eslint = this.#eslint;
-		const ignoredResults = await getIgnoredExplicitFileResults(this.#linterOptions.cwd, globs, eslint, [...defaultIgnores, ...discoveryIgnores]);
-
-		if (files.length === 0) {
-			if (hasExplicitFilePaths && ignoredResults.length === 0) {
-				throw new Error(noFilesFoundErrorMessage);
-			}
-
-			return this.processReport(ignoredResults);
-		}
-
-		const results = await eslint.lintFiles(files);
-
-		const rulesMeta = eslint.getRulesMetaForResults(results);
-
-		// No overlap: `warnIgnored: false` makes ESLint silently drop ignored files from `results`.
-		return this.processReport([...results, ...ignoredResults], {rulesMeta});
-	}
+        throw new Error("STUB");
+    }
 
 	/**
 	Lints the text on the XO instance.
@@ -757,45 +572,16 @@ export class Xo {
 		code: string,
 		lintTextOptions: LintTextOptions,
 	): Promise<XoLintResult> {
-		const {filePath, warnIgnored: shouldWarnIgnored} = lintTextOptions;
-
-		await this.assertSuppressionsFileExists();
-
-		await this.initEslint([filePath]);
-
-		if (!this.#eslint) {
-			throw new Error('Failed to initialize ESLint');
-		}
-
-		const results = await this.#eslint.lintText(code, {
-			filePath,
-			warnIgnored: shouldWarnIgnored,
-		});
-
-		const rulesMeta = this.#eslint.getRulesMetaForResults(results);
-
-		return this.processReport(results, {rulesMeta});
-	}
+        throw new Error("STUB");
+    }
 
 	async calculateConfigForFile(filePath: string): Promise<Linter.Config> {
-		await this.initEslint([filePath]);
-
-		if (!this.#eslint) {
-			throw new Error('Failed to initialize ESLint');
-		}
-
-		return this.#eslint.calculateConfigForFile(filePath) as Promise<Linter.Config>;
-	}
+        throw new Error("STUB");
+    }
 
 	async getFormatter(name: string) {
-		await this.initEslint();
-
-		if (!this.#eslint) {
-			throw new Error('Failed to initialize ESLint');
-		}
-
-		return this.#eslint.loadFormatter(name);
-	}
+        throw new Error("STUB");
+    }
 }
 
 export default Xo;
